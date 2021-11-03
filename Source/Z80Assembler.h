@@ -54,6 +54,7 @@ enum Target
 	ZX80,	// ZX 80 snapshot / tape file
 	ZX81,	// ZX 81 snapshot / tape file
 	ZX81P,	// ZX 81 snapshot / tape file
+	KCC,	// KC85/2-5 file
 	ACE,	// Jupiter Ace snapshot
 	TZX		// universal ZX Spectrum etc. tape file
 };
@@ -280,6 +281,7 @@ public:
 	void	writeAceFile	(FD&)	throws;
 	void	writeZX80File	(FD&)	throws;
 	void	writeZX81File	(FD&)	throws;
+	void	writeKCCFile	(FD&)	throws;
 	void	checkBinFile	()		throws;
 	void	checkTapFile	()		throws;
 	void	checkTzxFile	()		throws;
@@ -288,6 +290,7 @@ public:
 	void	checkAceFile	()		throws;
 	void	checkZX80File	()		throws;
 	void	checkZX81File	()		throws;
+	void	checkKCCFile	()		throws;
 
 	void	checkCpuOptions	() throws;
 	uint	numErrors		() const noexcept { return errors.count(); }

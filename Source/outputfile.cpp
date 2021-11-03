@@ -76,6 +76,7 @@ void Z80Assembler::writeTargetfile (cstr& dname, int style) throws
 	case ZX80:	return writeZX80File(fd);
 	case ZX81:
 	case ZX81P:	return writeZX81File(fd);
+	case KCC:	return writeKCCFile(fd);
 	}
 	throw SyntaxError("internal error: writeTargetfile: unknown target");
 }
@@ -115,6 +116,54 @@ void Z80Assembler::writeZX81File (FD& fd) throws
 	// just concatenate everything
 
 	writeBinFile(fd);
+}
+
+void Z80Assembler::writeKCCFile (FD& fd) throws
+{
+	// no error checking!
+	// just concatenate everything
+
+	CodeSegments segments(this->segments);
+	CodeSegment& s = segments[0];
+
+	char kccname[9];
+	strncpy(kccname,upperstr(basename_from_path(source_filename)),8);
+	size_t length = strlen(kccname);
+	while(length < 8){
+		kccname[length] = ' ';
+		length++;
+	}
+
+	uint16 startaddr = 0;
+	for (uint i=0;i<labels.count();i++)
+	{
+		Array<RCPtr<Label>>& labels = this->labels[i].getItems();
+		for (uint j=0;j<labels.count();j++)
+		{
+			Label* l = labels[j];
+			if (strcmp(l->name, "START") == 0)
+			{
+				startaddr = uint16(l->value);
+				break;
+			}
+		}
+	}
+
+	fd.write_str(kccname);
+	fd.write_str("KCC");
+	uint8 res[] = {0,0,0,0,0}; // reserved bytes
+	fd.write_bytes(res,5);
+	startaddr == 0 ? fd.write_uint8(2) : fd.write_uint8(3); // autostart?
+	fd.write_uint16_z(uint16(s.address));
+	fd.write_uint16_z(uint16(s.address + s.outputSize()));
+	fd.write_uint16_z(startaddr);
+	uint8 fill[105] = { 0 };
+	fd.write_bytes(fill,105);
+
+	for (uint i=0; i<segments.count(); i++)
+	{
+		write_segment(fd,segments[i]);
+	}
 }
 
 void Z80Assembler::writeHexFile (FD& fd) throws
@@ -741,6 +790,7 @@ void Z80Assembler::checkTargetfile () throws
 	case ZX80: return checkZX80File();
 	case ZX81P:
 	case ZX81: return checkZX81File();
+	case KCC: return checkKCCFile();
 	}
 	throw SyntaxError("internal error: checkTargetfile: unknown target");
 }
@@ -1777,6 +1827,10 @@ anypage:		if (s.size.value != 16 kB) { setError("segment %s: page size must be 1
 	}
 }
 
+void Z80Assembler::checkKCCFile () throws
+{
+	CodeSegments(segments).checkNoFlagsSet();
+}
 
 
 

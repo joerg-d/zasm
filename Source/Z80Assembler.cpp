@@ -2746,6 +2746,7 @@ void Z80Assembler::asmTarget (SourceLine& q) throws
 		targets.add("81",ZX81);
 		targets.add("p",ZX81);
 		targets.add("p81",ZX81P);
+		targets.add("kcc",KCC);
 		targets.add("ace",ACE);
 		targets.add("tzx",TZX);
 	}
